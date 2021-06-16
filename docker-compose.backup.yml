@@ -1,0 +1,100 @@
+version: "3"
+#in docker services represnt all of our containers
+services:
+  node-app:
+    build: .
+    ports: 
+      - "3000:3000"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    environment: 
+      - PORT=3000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
