@@ -1,6 +1,10 @@
 version: "3"
 #in docker services represnt all of our containers
 services:
+    nginx:
+    ports:
+      - "80:80"
+  
   node-app:
     build:
       context: .

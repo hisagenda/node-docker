@@ -3,15 +3,17 @@ const User = require("../models/userModel")
 const bcrypt = require("bcryptjs")
 
 exports.signUp = async (req, res) => {
-    const {username, password} = req.body
+    const {username, password} = req.body;
     try {
-        const hashpassword = await bcrypt.hash(password, 12)
+        const hashpassword = await bcrypt.hash(password, 12);
 
         const newUser = await User.create({
             username,
             password: hashpassword,
-        })
+        });
 
+       req.session.user = newUser;
+ 
         res.status(201).json({
             status: 'success',
             data: {
@@ -28,7 +30,7 @@ exports.signUp = async (req, res) => {
 exports.login = async (req, res) => {
     const {username, password} = req.body;
     try {
-        const user = await user.findOne({username})
+        const user = await User.findOne({username})
 
         if (!user) {
             return res.status(404).json({

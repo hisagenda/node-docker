@@ -1,7 +1,8 @@
 const express = require("express")
 const mongoose = require('mongoose');
 const session = require("express-session")
-const redis = require ("redis")
+const redis = require ("redis");
+const cors = require ("cors");
 let RedisStore = require("connect-redis")(session)
 
 
@@ -24,6 +25,9 @@ mongoose.connect(mongoURL)
   .then(() => console.log("successfully connected to DB"))
   .catch((e) => console.log(e));
 
+
+app.enable("trust proxy");
+app.use(cors({}));
 app.use(session({
   store: new RedisStore({client: redisClient}),
   secret: SESSION_SECRET,
@@ -32,15 +36,16 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     httpOnly: true,
-    maxAge: 30000, //milliseconds
+    maxAge: 3000000, //milliseconds
   }
 }))
 
 app.use(express.json());
-app.get("/", (req, res) => {
+app.get("/api/v1", (req, res) => {
 
 
-  res.send("<h2> Hi there</h2>")
+  res.send("<h2> Hi there</h2>");
+  console.log("yeah it ran");
 
 });
 
@@ -53,3 +58,4 @@ app.use("/api/v1/users", userRouter);
 const port = process.env.PORT || 3000
 
 app.listen(port, () => console.log("listening on port ${port}"))
+

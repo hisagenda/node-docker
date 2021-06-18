@@ -1,12 +1,15 @@
 version: "3"
 #in docker services represnt all of our containers
 services:
+  nginx:
+    ports:
+      - "3000:80"
   node-app:
     build:
       context: .
-      args: 
+      args:
         NODE_ENV: development
-    volumes:    
+    volumes:
       - ./:/app
       - /app/node_modules
     environment:
@@ -17,10 +20,7 @@ services:
 
     command: npm run dev #going to run the script in our index.js file
 
-  mongo: 
-    environment: 
+  mongo:
+    environment:
       - MONGO_INITDB_ROOT_USERNAME=abiola
       - MONGO_INITDB_ROOT_PASSWORD=mypassword
-
-
-
