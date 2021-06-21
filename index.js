@@ -1,61 +1,58 @@
-const express = require("express")
-const mongoose = require('mongoose');
-const session = require("express-session")
-const redis = require ("redis");
-const cors = require ("cors");
-let RedisStore = require("connect-redis")(session)
+const User = require("../models/userModel");
 
+const bcrypt = require("bcryptjs");
 
-const { MONGO_USER, MONGO_PASSWORD, MONGO_PORT, MONGO_IP, REDIS_URL, SESSION_SECRET, REDIS_PORT } = require("./config/config");
+exports.signUp = async (req, res) => {
+  const { username, password } = req.body;
 
-let redisClient = redis.createClient({
-  host:REDIS_URL,
-  port: REDIS_PORT,
-})
-const postRouter = require("./routes/postRoutes")
-
-const userRouter = require("./routes/userRoutes")
-
-
-const app = express();
-
-const mongoURL = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_IP}:${MONGO_PORT}/?authSource=admin`
-
-mongoose.connect(mongoURL)
-  .then(() => console.log("successfully connected to DB"))
-  .catch((e) => console.log(e));
-
-
-app.enable("trust proxy");
-app.use(cors({}));
-app.use(session({
-  store: new RedisStore({client: redisClient}),
-  secret: SESSION_SECRET,
-  cookie: {
-    secure: false,
-    resave: false,
-    saveUninitialized: false,
-    httpOnly: true,
-    maxAge: 3000000, //milliseconds
+  try {
+    const hashpassword = await bcrypt.hash(password, 12);
+    const newUser = await User.create({
+      username,
+      password: hashpassword,
+    });
+    req.session.user = newUser;
+    res.status(201).json({
+      status: "success",
+      data: {
+        user: newUser,
+      },
+    });
+  } catch (e) {
+    res.status(400).json({
+      status: "fail",
+    });
   }
-}))
+};
 
-app.use(express.json());
-app.get("/api/v1", (req, res) => {
+exports.login = async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const user = await User.findOne({ username });
 
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "user not found",
+      });
+    }
 
-  res.send("<h2> Hi there</h2>");
-  console.log("yeah it ran");
+    const isCorrect = await bcrypt.compare(password, user.password);
 
-});
-
-//localhost:3000/api/v1/post
-
-app.use("/api/v1/posts", postRouter);
-
-app.use("/api/v1/users", userRouter);
-
-const port = process.env.PORT || 3000
-
-app.listen(port, () => console.log("listening on port ${port}"))
-
+    if (isCorrect) {
+      req.session.user = user;
+      res.status(200).json({
+        status: "success",
+      });
+    } else {
+      res.status(400).json({
+        status: "fail",
+        message: "incorrect username or password",
+      });
+    }
+  } catch (e) {
+    res.status(400).json({
+      status: "fail",
+    });
+  }
+};
