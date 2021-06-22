@@ -9,7 +9,7 @@ services:
 
   node-app:
     build: .
-
+    image: abiola89/node-app:pilot
     environment: 
       - PORT=3000
     depends_on: 
